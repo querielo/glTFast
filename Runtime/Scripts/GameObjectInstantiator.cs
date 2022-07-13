@@ -13,6 +13,12 @@
 // limitations under the License.
 //
 
+#if NEWTONSOFT_JSON && GLTFAST_USE_NEWTONSOFT_JSON
+#define JSON_NEWTONSOFT
+#else
+#define JSON_UTILITY
+#endif
+
 using System;
 using System.Collections.Generic;
 using GLTFast.Schema;
@@ -237,6 +243,15 @@ namespace GLTFast {
             go.transform.SetParent(
                 parentIndex.HasValue ? nodes[parentIndex.Value].transform : sceneTransform,
                 false);
+
+#if JSON_NEWTONSOFT
+            var node = gltf.GetSourceNode((int)nodeIndex);
+            if (node.extras != null) {
+                var extras = node.extras.ToObject<Dictionary<string, string>>();
+                var ed = go.AddComponent<GltfExtras>();
+                ed.SetData(extras);
+            }
+#endif
         }
 
         /// <inheritdoc />
