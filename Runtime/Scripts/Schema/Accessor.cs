@@ -13,10 +13,19 @@
 // limitations under the License.
 //
 
+#if NEWTONSOFT_JSON && GLTFAST_USE_NEWTONSOFT_JSON
+#define JSON_NEWTONSOFT
+#else
+#define JSON_UTILITY
+#endif
+
 using System;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+#if JSON_NEWTONSOFT
+using Newtonsoft.Json;
+#endif
 
 // GLTF_EXPORT
 using UnityEngine.Rendering;
@@ -147,6 +156,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public int count;
 
+#if JSON_UTILITY
         /// <summary>
         /// Specifies if the attribute is a scalar, vector, or matrix,
         /// and the number of elements in the vector or matrix.
@@ -177,7 +187,10 @@ namespace GLTFast.Schema {
                 type = value.ToString();
             }
         }
-    
+#else
+        [JsonProperty("type")]
+        public GLTFAccessorAttributeType typeEnum = GLTFAccessorAttributeType.Undefined;
+#endif
         /// <summary>
         /// Maximum value of each component in this attribute.
         /// Both min and max arrays have the same length.
@@ -375,7 +388,11 @@ namespace GLTFast.Schema {
             }
             writer.AddProperty("componentType", (int)componentType);
             writer.AddProperty("count", count);
+#if JSON_UTILITY
             writer.AddProperty("type", type);
+#else
+            writer.AddProperty("type", typeEnum.ToString());
+#endif
             if (byteOffset > 0) {
                 writer.AddProperty("byteOffset", byteOffset);
             }
